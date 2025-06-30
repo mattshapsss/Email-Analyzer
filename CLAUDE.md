@@ -10,7 +10,7 @@ Instant push notifications when emails arrive, with AI-powered urgency detection
 iOS 18 (June 2025) design language with dark mode as primary theme.
 
 ## Core Value Proposition
-- Get notified INSTANTLY when important emails arrive (not just any email)
+- Get notified INSTANTLY when any emails arrive 
 - AI determines if action is needed and urgency level
 - Beautiful, minimal interface - "it just works"
 - No email management - purely notification intelligence

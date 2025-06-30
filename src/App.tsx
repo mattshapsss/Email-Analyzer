@@ -11,6 +11,8 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import { useEffect, useState } from 'react';
 import { storageService } from './services/storage.service';
+import { oauthRedirectService } from './services/oauth-redirect.service';
+import { App as CapacitorApp } from '@capacitor/app';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -51,7 +53,23 @@ const App: React.FC = () => {
 
   useEffect(() => {
     checkAuth();
+    setupDeepLinkListener();
   }, []);
+
+  const setupDeepLinkListener = () => {
+    CapacitorApp.addListener('appUrlOpen', async (data) => {
+      console.log('App opened with URL:', data.url);
+      
+      // Check if this is an OAuth callback
+      if (data.url.includes('oauth')) {
+        const success = await oauthRedirectService.handleCallback(data.url);
+        if (success) {
+          // Reload to show authenticated state
+          window.location.reload();
+        }
+      }
+    });
+  };
 
   const checkAuth = async () => {
     const tokens = await storageService.getAuthTokens();

@@ -25,6 +25,19 @@ export class StorageService {
     await Preferences.remove({ key: this.AUTH_KEY });
   }
 
+  async setItem(key: string, value: string): Promise<void> {
+    await Preferences.set({ key, value });
+  }
+
+  async getItem(key: string): Promise<string | null> {
+    const { value } = await Preferences.get({ key });
+    return value;
+  }
+
+  async removeItem(key: string): Promise<void> {
+    await Preferences.remove({ key });
+  }
+
   async saveUserPreferences(prefs: UserPreferences): Promise<void> {
     await Preferences.set({
       key: this.USER_PREFS_KEY,

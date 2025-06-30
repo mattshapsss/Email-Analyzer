@@ -9,7 +9,7 @@ import {
   IonAlert
 } from '@ionic/react';
 import { logoGoogle } from 'ionicons/icons';
-import { authService } from '../services/auth.service';
+import { oauthRedirectService } from '../services/oauth-redirect.service';
 import { useHistory } from 'react-router-dom';
 
 const Login: React.FC = () => {
@@ -22,13 +22,10 @@ const Login: React.FC = () => {
       setIsLoading(true);
       setError(null);
       
-      await authService.initialize();
-      const user = await authService.signIn();
+      await oauthRedirectService.signIn();
       
-      console.log('Signed in as:', user.email);
-      
-      // Navigate to main app
-      history.replace('/tabs/tab1');
+      // The OAuth redirect will handle the sign-in flow
+      // For iOS, it will open in a new window
     } catch (err: any) {
       setError(err.message || 'Failed to sign in. Please try again.');
       console.error('Sign in error:', err);

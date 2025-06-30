@@ -1,8 +1,11 @@
 import { AuthTokens, User } from '../types';
 import { storageService } from './storage.service';
+import { isPlatform } from '@ionic/react';
 
 export class SimpleAuthService {
-  private readonly CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  private readonly CLIENT_ID = isPlatform('capacitor') 
+    ? import.meta.env.VITE_GOOGLE_CLIENT_ID_IOS 
+    : import.meta.env.VITE_GOOGLE_CLIENT_ID;
   private tokenClient: any = null;
   private accessToken: string = '';
 

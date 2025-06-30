@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Redirecting to Email Analyzer...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Redirecting to Email Analyzer...</h2>
+        <div class="spinner"></div>
+        <p>If the app doesn't open automatically, click the button below:</p>
+        <button onclick="openApp()">Open Email Analyzer</button>
+    </div>
+
+    <script>
+        function openApp() {
+            // Get the current URL parameters
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            const state = params.get('state');
+            
+            if (code && state) {
+                // Build the app URL with parameters
+                const appUrl = `com.emailanalyzer.app://oauth?code=${code}&state=${state}`;
+                
+                // Try to open the app
+                window.location.href = appUrl;
+                
+                // Fallback: close the window after a delay
+                setTimeout(() => {
+                    window.close();
+                }, 1000);
+            } else {
+                document.querySelector('h2').textContent = 'Authentication failed';
+                document.querySelector('.spinner').style.display = 'none';
+                document.querySelector('p').textContent = 'Please try signing in again.';
+                document.querySelector('button').style.display = 'none';
+            }
+        }
+        
+        // Automatically try to open the app when the page loads
+        window.onload = openApp;
+    </script>
+</body>
+</html>

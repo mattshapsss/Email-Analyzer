@@ -4,7 +4,9 @@ import { storageService } from './storage.service';
 import { isPlatform } from '@ionic/react';
 
 export class AuthService {
-  private readonly GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+  private readonly GOOGLE_CLIENT_ID = isPlatform('capacitor') 
+    ? (import.meta.env.VITE_GOOGLE_CLIENT_ID_IOS || '')
+    : (import.meta.env.VITE_GOOGLE_CLIENT_ID || '');
   private readonly SCOPES = [
     'https://www.googleapis.com/auth/gmail.readonly',
     'https://www.googleapis.com/auth/userinfo.email',
