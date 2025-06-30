@@ -128,14 +128,15 @@ npm run typecheck      # TypeScript check
 - Background refresh: every 30 minutes
 
 ## Current Implementation Status
-- ✅ Gmail OAuth working (fetches & displays emails)
+- ✅ Gmail OAuth working (iOS-compatible web flow)
 - ✅ Gemini AI analysis (detects urgency/actions)
-- ✅ Basic functional UI
+- ✅ iOS 18 dark mode UI
+- ✅ Daily email metrics tracking
+- ✅ Automatic midnight reset for daily counts
 - ✅ Pub/Sub topic configured
-- ✅ iOS 18 dark mode UI started
-- 🔄 Webhook endpoint needed (Vercel)
-- ⏳ Gmail watch() API call pending
-- ⏳ iOS build & push notifications pending
+- ✅ Vercel webhook deployed
+- 🔄 Gmail watch() API needs to be called
+- ⏳ Push notifications pending setup
 
 ## Immediate Next Steps
 1. ✅ Deploy Vercel webhook function (free tier) - READY TO DEPLOY
@@ -157,10 +158,18 @@ npm run typecheck      # TypeScript check
 
 ## 🔑 Current Authentication Status (Dec 2024)
 - ❌ Native Google Sign-In plugin REMOVED (was causing crashes)
-- ✅ Using web-based OAuth (works perfectly on iOS)
+- ✅ Using web-based OAuth with authorization code flow
 - ✅ Have both Web and iOS OAuth client IDs configured
-- ✅ Login uses Google Identity Services (web popup)
+- ✅ Custom redirect handling via oauth-redirect.html
+- ✅ Deep linking configured for OAuth callbacks
 - ✅ Tokens stored securely with Capacitor Preferences
+
+## 📊 Daily Metrics System
+- **Emails Analyzed Today**: Counts each email analyzed by AI (resets at midnight)
+- **Urgent Emails Today**: Counts emails requiring action (needsAction + urgencyLevel)
+- **Automatic Reset**: Metrics reset at midnight in user's local timezone
+- **Data Persistence**: Metrics stored locally with 7-day retention
+- **Real-time Updates**: Counts update as emails are analyzed
 
 ## How Push Flow Works
 1. User signs in → Gmail OAuth
