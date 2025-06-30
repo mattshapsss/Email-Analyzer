@@ -21,7 +21,7 @@ export class GmailWebService {
         throw new Error('Token expired, please refresh');
       }
 
-      const response = await fetch(`${this.BASE_URL}/users/me/messages?maxResults=${maxResults}&q=is:unread OR is:starred`, {
+      const response = await fetch(`${this.BASE_URL}/users/me/messages?maxResults=${maxResults}`, {
         headers: {
           'Authorization': `Bearer ${tokens.accessToken}`,
           'Content-Type': 'application/json'

@@ -14,14 +14,15 @@ import { gmailWebService } from '../services/gmail-web.service';
 import { geminiService } from '../services/gemini.service';
 import { gmailPushService } from '../services/gmail-push.service';
 import { storageService } from '../services/storage.service';
+import { dailyMetricsService } from '../services/daily-metrics.service';
 import { Email, AnalysisResult, UrgencyLevel } from '../types';
 import '../theme/ios-design-system.css';
 import './Dashboard.css';
 
 const Dashboard: React.FC = () => {
   const [isActive, setIsActive] = useState(false);
-  const [emailCount, setEmailCount] = useState(0);
-  const [urgentCount, setUrgentCount] = useState(0);
+  const [emailsAnalyzedToday, setEmailsAnalyzedToday] = useState(0);
+  const [urgentEmailsToday, setUrgentEmailsToday] = useState(0);
   const [loading, setLoading] = useState(true);
   const [lastSync, setLastSync] = useState<Date | null>(null);
   const [user, setUser] = useState<any>(null);
@@ -29,11 +30,36 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     initializeDashboard();
     setupEventListeners();
+    setupMidnightReset();
     
     return () => {
       window.removeEventListener('new-emails-available', handleNewEmails);
     };
   }, []);
+
+  // Set up a timer to reset metrics at midnight
+  const setupMidnightReset = () => {
+    const checkMidnight = () => {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      
+      // Calculate milliseconds until midnight
+      const msUntilMidnight = tomorrow.getTime() - now.getTime();
+      
+      // Set a timeout to reset at midnight
+      setTimeout(async () => {
+        console.log('🕛 Midnight! Resetting daily metrics...');
+        await loadTodayMetrics();
+        
+        // Set up the next midnight check
+        setupMidnightReset();
+      }, msUntilMidnight);
+    };
+    
+    checkMidnight();
+  };
 
   const initializeDashboard = async () => {
     try {
@@ -48,6 +74,9 @@ const Dashboard: React.FC = () => {
         // Fetch user info
         await fetchUserInfo(tokens.accessToken);
         
+        // Load today's metrics
+        await loadTodayMetrics();
+        
         // Check initial emails
         await checkEmails();
         
@@ -58,6 +87,16 @@ const Dashboard: React.FC = () => {
       console.error('Dashboard initialization error:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadTodayMetrics = async () => {
+    try {
+      const metrics = await dailyMetricsService.getTodayMetrics();
+      setEmailsAnalyzedToday(metrics.emailsAnalyzedToday);
+      setUrgentEmailsToday(metrics.urgentEmailsToday);
+    } catch (error) {
+      console.error('Failed to load today metrics:', error);
     }
   };
 
@@ -96,11 +135,9 @@ const Dashboard: React.FC = () => {
   const checkEmails = async () => {
     try {
       const emails = await gmailWebService.fetchEmails(20);
-      setEmailCount(emails.length);
       
-      // Analyze emails for urgent items
-      const urgent = await analyzeUrgentEmails(emails);
-      setUrgentCount(urgent);
+      // Analyze emails and track metrics
+      await analyzeEmailsWithTracking(emails);
       
       setLastSync(new Date());
     } catch (error) {
@@ -108,14 +145,40 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const analyzeUrgentEmails = async (emails: Email[]): Promise<number> => {
-    // In production, this would analyze all emails
-    // For now, just count unread emails as potentially urgent
-    return emails.filter(email => !email.isRead).length;
+  const analyzeEmailsWithTracking = async (emails: Email[]) => {
+    // Analyze each email with AI and track metrics
+    for (const email of emails) {
+      try {
+        const analysis = await geminiService.analyzeEmail(email);
+        
+        // Determine if urgent (needs action and has urgency)
+        const isUrgent = analysis.needsAction && analysis.urgencyLevel !== 'none';
+        
+        // Track this analysis
+        await dailyMetricsService.trackEmailAnalyzed(
+          email.id,
+          isUrgent,
+          analysis.urgencyLevel
+        );
+        
+        // Update the UI with new metrics
+        const updatedMetrics = await dailyMetricsService.getTodayMetrics();
+        setEmailsAnalyzedToday(updatedMetrics.emailsAnalyzedToday);
+        setUrgentEmailsToday(updatedMetrics.urgentEmailsToday);
+        
+      } catch (error) {
+        console.error('Failed to analyze email:', error);
+      }
+    }
   };
 
   const handleRefresh = async (event: CustomEvent<RefresherEventDetail>) => {
+    // Reload today's metrics first
+    await loadTodayMetrics();
+    
+    // Then check for new emails
     await checkEmails();
+    
     event.detail.complete();
   };
 
@@ -172,15 +235,15 @@ const Dashboard: React.FC = () => {
           {isActive && (
             <div className="stats-container">
               <div className="stat-item">
-                <div className="stat-value">{emailCount}</div>
-                <div className="stat-label">Recent Emails</div>
+                <div className="stat-value">{emailsAnalyzedToday}</div>
+                <div className="stat-label">Emails Analyzed Today</div>
               </div>
               
               <div className="stat-divider" />
               
               <div className="stat-item">
-                <div className="stat-value urgent">{urgentCount}</div>
-                <div className="stat-label">Need Action</div>
+                <div className="stat-value urgent">{urgentEmailsToday}</div>
+                <div className="stat-label">Urgent Emails Today</div>
               </div>
             </div>
           )}
