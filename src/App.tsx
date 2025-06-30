@@ -1,22 +1,16 @@
 import { Redirect, Route } from 'react-router-dom';
 import {
   IonApp,
-  IonIcon,
-  IonLabel,
+  IonContent,
   IonRouterOutlet,
-  IonTabBar,
-  IonTabButton,
-  IonTabs,
   setupIonicReact
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { ellipse, square, triangle, lockClosedOutline } from 'ionicons/icons';
-import Tab1 from './pages/Tab1';
-import Tab2 from './pages/Tab2';
-import Tab3 from './pages/Tab3';
-import TestAuth from './pages/TestAuth';
+import { home, mail, settings } from 'ionicons/icons';
+import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
-import TestAuthSimple from './pages/TestAuthSimple';
+import { useEffect, useState } from 'react';
+import { storageService } from './services/storage.service';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -41,63 +35,56 @@ import '@ionic/react/css/display.css';
  * https://ionicframework.com/docs/theming/dark-mode
  */
 
-/* import '@ionic/react/css/palettes/dark.always.css'; */
-/* import '@ionic/react/css/palettes/dark.class.css'; */
-import '@ionic/react/css/palettes/dark.system.css';
+/* Dark mode always on */
+import '@ionic/react/css/palettes/dark.always.css';
 
 /* Theme variables */
 import './theme/variables.css';
+import './theme/ios-design-system.css';
 
-setupIonicReact();
+setupIonicReact({
+  mode: 'ios'
+});
 
-const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
-      <IonTabs>
+const App: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const tokens = await storageService.getAuthTokens();
+    setIsAuthenticated(!!tokens);
+  };
+
+  if (isAuthenticated === null) {
+    return (
+      <IonApp>
+        <IonContent className="ion-padding ion-text-center">
+          <div style={{ marginTop: '50%' }}>Loading...</div>
+        </IonContent>
+      </IonApp>
+    );
+  }
+
+  return (
+    <IonApp>
+      <IonReactRouter>
         <IonRouterOutlet>
-          <Route exact path="/tab1">
-            <Tab1 />
-          </Route>
-          <Route exact path="/tab2">
-            <Tab2 />
-          </Route>
-          <Route path="/tab3">
-            <Tab3 />
-          </Route>
-          <Route exact path="/test">
-            <TestAuth />
+          <Route exact path="/dashboard">
+            <Dashboard />
           </Route>
           <Route exact path="/login">
             <Login />
           </Route>
-          <Route exact path="/simple">
-            <TestAuthSimple />
-          </Route>
           <Route exact path="/">
-            <Redirect to="/simple" />
+            <Redirect to={isAuthenticated ? "/dashboard" : "/login"} />
           </Route>
         </IonRouterOutlet>
-        <IonTabBar slot="bottom">
-          <IonTabButton tab="tab1" href="/tab1">
-            <IonIcon aria-hidden="true" icon={triangle} />
-            <IonLabel>Tab 1</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="tab2" href="/tab2">
-            <IonIcon aria-hidden="true" icon={ellipse} />
-            <IonLabel>Tab 2</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="tab3" href="/tab3">
-            <IonIcon aria-hidden="true" icon={square} />
-            <IonLabel>Tab 3</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="test" href="/test">
-            <IonIcon aria-hidden="true" icon={lockClosedOutline} />
-            <IonLabel>Test Auth</IonLabel>
-          </IonTabButton>
-        </IonTabBar>
-      </IonTabs>
-    </IonReactRouter>
-  </IonApp>
-);
+      </IonReactRouter>
+    </IonApp>
+  );
+};
 
 export default App;

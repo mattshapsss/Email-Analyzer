@@ -1,5 +1,9 @@
 # Email Analyzer iOS App
 
+## 🚨 CRITICAL: Working Directory Rules
+**ONLY USE**: `/Users/mattshapiro/Desktop/Email-Analyzer/` (the cloned GitHub folder)
+**NEVER USE**: `/Users/mattshapiro/Desktop/samson's/email-analyzer/` (old folder)
+
 ## Project Overview
 Native iOS application distributed via AltStore for real-time Gmail analysis using Google Gemini AI.
 Instant push notifications when emails arrive, with AI-powered urgency detection.
@@ -149,7 +153,14 @@ npm run typecheck      # TypeScript check
 - ✅ Enhanced AI prompt with context understanding
 - ✅ Test emails provided: `TEST_EMAILS.md`
 - ✅ AI explanation: `AI_ANALYSIS_EXPLAINED.md`
-- 🔄 Ready to deploy: Run `vercel` in terminal
+- ✅ Deployed to: https://email-analyzer-agix6eg34-matthews-projects-1429af0d.vercel.app
+
+## 🔑 Current Authentication Status (Dec 2024)
+- ❌ Native Google Sign-In plugin REMOVED (was causing crashes)
+- ✅ Using web-based OAuth (works perfectly on iOS)
+- ✅ Have both Web and iOS OAuth client IDs configured
+- ✅ Login uses Google Identity Services (web popup)
+- ✅ Tokens stored securely with Capacitor Preferences
 
 ## How Push Flow Works
 1. User signs in → Gmail OAuth
